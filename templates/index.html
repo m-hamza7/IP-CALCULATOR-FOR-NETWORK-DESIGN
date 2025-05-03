@@ -6,33 +6,55 @@
     <title>IP Subnet Calculator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-
-
 <body>
+    <div class="data-packet"></div>
+    <div class="data-packet"></div>
+    <div class="data-packet"></div>
     <div class="container">
         <h1>IP Subnet Calculator</h1>
-        <label for="org-name">Organization Name:</label>
-        <input type="text" id="org-name" placeholder="Enter Organization Name">
-        <button id="register-org">Register Organization</button><br>
         
-        <label for="ip-address">Enter IP Address:</label>
-        <input type="text" id="ip-address" placeholder="e.g., 192.168.1.10">
+        <div class="input-group">
+            <label for="org-name">Organization Name</label>
+            <input type="text" id="org-name" placeholder="Enter organization name">
+        </div>
+
+        <div class="input-group">
+            <label for="pc-count">Number of PCs</label>
+            <input type="number" id="pc-count" min="1" placeholder="Enter number of PCs">
+        </div>
+
+        <button id="register-org" class="button">Register Organization</button>
+
+        <div class="input-group">
+            <label for="ip-address">IP Address</label>
+            <input type="text" id="ip-address" placeholder="e.g., 192.168.1.10">
+        </div>
         
-        <label for="subnet-mask">Enter Subnet Mask:</label>
-        <input type="text" id="subnet-mask" placeholder="e.g., 255.255.255.0">
+        <div class="input-group">
+            <label for="subnet-mask">Subnet Mask</label>
+            <input type="text" id="subnet-mask" placeholder="e.g., 255.255.255.0">
+        </div>
         
-        <button id="calculate-btn">Calculate</button>
+        <button id="calculate-btn" class="button">Calculate Subnets</button>
         
         <div id="result"></div>
-        <button id="export-btn">Export Subnets</button>
-        <h2>Subnet Allocation Visualization</h2>
-        <canvas id="subnetChart"></canvas>
-        <button id="load-chart">Load Chart</button>
 
+        <div class="chart-container">
+            <h2>Subnet Allocation Chart</h2>
+            <div id="loading" class="loading" style="display: none;"></div>
+            <canvas id="subnetChart"></canvas>
+            <button id="load-chart" class="button">Load Chart</button>
+        </div>
+
+        <button id="export-btn" class="button">Export Subnet Data</button>
+        <div class="navigation-buttons">
+            <a href="/subnet_assignment"  class="button">New Subnet Assignment</a>
+            <a href="/existing_organizations"  class="button">View Organizations</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

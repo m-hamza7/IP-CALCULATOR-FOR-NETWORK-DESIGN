@@ -5,24 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Existing Organizations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <h1>Registered Organizations</h1>
-        <table id="orgTable">
-            <thead>
-                <tr>
-                    <th>Organization Name</th>
-                    <th>Assigned Subnet</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Organization data will be inserted dynamically -->
-            </tbody>
-        </table>
-        <a href="/" class="btn">Back to Home</a>
+        
+        <div class="organizations-list">
+            {% for org in organizations %}
+            <div class="org-card">
+                <div class="org-header" onclick="toggleSubnets('org-{{ loop.index }}')">
+                    <h2><i class="fas fa-building"></i> {{ org.name }}</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                
+                <div id="org-{{ loop.index }}" class="subnets-container" style="display: none;">
+                    {% for subnet in org.subnets %}
+                    <div class="subnet-card">
+                        <div class="subnet-header" onclick="togglePCs('subnet-{{ loop.index0 }}-{{ loop.index }}')">
+                            <h3><i class="fas fa-network-wired"></i> {{ subnet.subnets }}</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        
+                        <div class="subnet-details">
+                            <div class="network-info">
+                                <p><i class="fas fa-sitemap"></i> Network: {{ subnet.network_address }}/{{ subnet.subnet.split('/')[1] }}</p>
+                                <p><i class="fas fa-broadcast-tower"></i> Broadcast: {{ subnet.broadcast_address }}</p>
+                                <p><i class="fas fa-terminal"></i> Range: {{ subnet.first_usable }} - {{ subnet.last_usable }}</p>
+                                <p><i class="fas fa-users"></i> Total Hosts: {{ subnet.total_hosts }}</p>
+                            </div>
+                            
+                            <div id="subnet-{{ loop.index0 }}-{{ loop.index }}" class="pc-list" style="display: none;">
+                                <h4><i class="fas fa-laptop"></i> Assigned PCs</h4>
+                                <div class="pc-grid">
+                                    {% for pc in subnet.pcs %}
+                                    <div class="pc-item">
+                                        <i class="fas fa-desktop"></i>
+                                        <span>{{ pc }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="navigation-buttons">
+            <a href="/" class="button"><i class="fas fa-home"></i> Back to Home</a>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+    function toggleSubnets(orgId) {
+        const subnetsContainer = document.getElementById(orgId);
+        const icon = subnetsContainer.previousElementSibling.querySelector('.fa-chevron-down');
+        if (subnetsContainer.style.display === 'none') {
+            subnetsContainer.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            subnetsContainer.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function togglePCs(subnetId) {
+        const pcList = document.getElementById(subnetId);
+        const icon = pcList.parentElement.previousElementSibling.querySelector('.fa-chevron-down');
+        if (pcList.style.display === 'none') {
+            pcList.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            pcList.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+    </script>
 </body>
 </html>

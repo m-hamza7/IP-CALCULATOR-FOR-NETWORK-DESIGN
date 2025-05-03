@@ -13,4 +13,3 @@ def calculate_subnet(ip_address, subnet_mask):
         }
     except ValueError:
         raise ValueError("Invalid IP address or subnet mask")
-
