@@ -71,7 +71,29 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error exporting subnets:", error));
     });
+    function showDialog(dialogId) {
+        document.getElementById(dialogId).style.display = 'flex';
+    }
+    
+    function closeDialog(dialogId) {
+        document.getElementById(dialogId).style.display = 'none';
+    }
+    
+    function handleConfirm() {
+        // Handle confirmation action here
+        closeDialog('myDialog');
+    }function showDialog(dialogId) {
+    document.getElementById(dialogId).style.display = 'flex';
+}
 
+function closeDialog(dialogId) {
+    document.getElementById(dialogId).style.display = 'none';
+}
+
+function handleConfirm() {
+    // Handle confirmation action here
+    closeDialog('myDialog');
+}
     // Load Subnet Chart
     document.getElementById("load-chart").addEventListener("click", function () {
         fetch("/export_subnets")

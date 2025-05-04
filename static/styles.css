@@ -17,8 +17,8 @@ body::before {
     height: 200%;
     top: -50%;
     left: -50%;
-    background: linear-gradient(rgba(35, 166, 213, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(35, 166, 213, 0.1) 1px, transparent 1px);
+    background: linear-gradient(rgba(35, 165, 213, 0.671) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(35, 165, 213, 0.329) 1px, transparent 1px);
     background-size: 50px 50px;
     animation: gridMove 20s linear infinite;
     z-index: -1;
@@ -161,7 +161,7 @@ body::before {
 /* Update result container */
 #result {
     background: rgba(33, 37, 41, 0.95);
-    color: #e9ecef;
+    color: #161d24;
 }
 
 /* Update chart container */
@@ -426,4 +426,111 @@ button:active {
 
 .fa-chevron-down {
     transition: transform 0.3s ease;
+}
+
+/* Dialog Box Styles */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dialog-box {
+    background: rgba(33, 37, 41, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px 0 rgba(35, 166, 213, 0.37);
+    border: 1px solid rgba(35, 166, 213, 0.18);
+    color: #e9ecef;
+    animation: dialogSlideIn 0.3s ease-out;
+}
+
+@keyframes dialogSlideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(35, 166, 213, 0.2);
+}
+
+.dialog-title {
+    font-size: 1.5rem;
+    margin: 0;
+    color: #23a6d5;
+}
+
+.dialog-close {
+    background: none;
+    border: none;
+    color: #e9ecef;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.dialog-close:hover {
+    color: #23a6d5;
+}
+
+.dialog-content {
+    margin-bottom: 20px;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.dialog-button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dialog-button-primary {
+    background: #23a6d5;
+    color: white;
+    border: none;
+}
+
+.dialog-button-primary:hover {
+    background: #1b8ab2;
+    transform: translateY(-2px);
+}
+
+.dialog-button-secondary {
+    background: transparent;
+    color: #e9ecef;
+    border: 1px solid #23a6d5;
+}
+
+.dialog-button-secondary:hover {
+    background: rgba(35, 166, 213, 0.1);
+    transform: translateY(-2px);
 }

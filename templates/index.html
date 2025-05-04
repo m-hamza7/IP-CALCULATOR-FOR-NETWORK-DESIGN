@@ -53,7 +53,23 @@
             <a href="/" class="button">Back to Home</a>
         </div>
     </div>
-
+    <div class="dialog-overlay" id="myDialog" style="display: none;">
+        <div class="dialog-box">
+            <div class="dialog-header">
+                <h2 class="dialog-title">Dialog Title</h2>
+                <button class="dialog-close" onclick="closeDialog('myDialog')">&times;</button>
+            </div>
+            <div class="dialog-content">
+                <!-- Your dialog content here -->
+                <p>Dialog message or content goes here.</p>
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-button dialog-button-secondary" onclick="closeDialog('myDialog')">Cancel</button>
+                <button class="dialog-button dialog-button-primary" onclick="handleConfirm()">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
