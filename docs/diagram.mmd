@@ -1,0 +1,41 @@
+flowchart TB
+    subgraph Frontend
+        UI["Web Interface"]--"User Input"-->Forms
+        Forms-->|"1. Organization Registration"| RegForm["Register Form"]
+        Forms-->|"2. Subnet Calculation"| CalcForm["Calculator Form"]
+        Forms-->|"3. View Organizations"| ViewOrg["Organization View"]
+    end
+
+    subgraph Backend["Flask Backend"]
+        Routes-->|"GET /"| Home
+        Routes-->|"GET /subnet_assignment"| SubnetAssign
+        Routes-->|"GET /existing_organizations"| ExistingOrgs
+        Routes-->|"POST /register_org"| RegisterOrg
+        Routes-->|"POST /calculate"| Calculate
+        Routes-->|"GET /export_subnets"| ExportSubnets
+
+        Calculate-->SubnetCalc["Subnet Calculator"]
+        SubnetCalc-->|"Uses"| IPAddress["ipaddress Module"]
+    end
+
+    subgraph Database["SQLite Database"]
+        Organizations[("organizations")]-->|"1:N"| PCs[("pcs")]
+        Organizations-->|"Stores"| OrgData["- Organization Name\n- PC Count\n- Created At"]
+        PCs-->|"Stores"| PCData["- IP Address\n- Subnet CIDR\n- Organization ID"]
+    end
+
+    UI-->|"HTTP Requests"| Routes
+    Routes-->|"CRUD Operations"| Database
+
+    subgraph Features["Key Features"]
+        direction TB
+        F1["Organization Management"]-->F2["Subnet Calculation"]
+        F2-->F3["IP Address Assignment"]
+        F3-->F4["Data Visualization"]
+        F4-->F5["Data Export"]
+    end
+
+    style Frontend fill:#f9f,stroke:#333,stroke-width:2px
+    style Backend fill:#bbf,stroke:#333,stroke-width:2px
+    style Database fill:#bfb,stroke:#333,stroke-width:2px
+    style Features fill:#ffb,stroke:#333,stroke-width:2px
