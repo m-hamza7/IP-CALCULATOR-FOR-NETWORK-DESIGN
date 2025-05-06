@@ -20,23 +20,52 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Calculate Subnets
+    // Add this after DOMContentLoaded
+    document.getElementById("subnet-type").addEventListener("change", function() {
+        const subnetHelp = document.getElementById("subnet-help");
+        const subnetInput = document.getElementById("subnet-input");
+        
+        if (this.value === "cidr") {
+            subnetHelp.textContent = "Enter CIDR notation (e.g., 26)";
+            subnetInput.placeholder = "26";
+        } else {
+            subnetHelp.textContent = "Enter subnet mask (e.g., 255.255.255.192)";
+            subnetInput.placeholder = "255.255.255.192";
+        }
+    });
+    
+    // Modify the calculate button event listener
     document.getElementById("calculate-btn").addEventListener("click", function () {
         let orgName = document.getElementById("org-name").value.trim();
         let ipAddress = document.getElementById("ip-address").value.trim();
-        let subnetMask = document.getElementById("subnet-mask").value.trim();
-
-        if (!orgName || !ipAddress || !subnetMask) {
-            alert("Please enter Organization Name, IP Address, and Subnet Mask.");
+        let subnetInput = document.getElementById("subnet-input").value.trim();
+        let subnetType = document.getElementById("subnet-type").value;
+    
+        if (!orgName || !ipAddress || !subnetInput) {
+            alert("Please fill in all required fields.");
             return;
         }
-
+    
+        // Validate subnet input based on type
+        if (subnetType === "cidr") {
+            if (!/^\d+$/.test(subnetInput) || subnetInput < 0 || subnetInput > 32) {
+                alert("Please enter a valid CIDR notation (0-32).");
+                return;
+            }
+        } else {
+            if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(subnetInput)) {
+                alert("Please enter a valid subnet mask (e.g., 255.255.255.192).");
+                return;
+            }
+        }
+    
         fetch("/calculate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 org_name: orgName,
                 ip_address: ipAddress,
-                subnet_mask: subnetMask
+                subnet_mask: subnetInput
             })
         })
         .then(response => response.json())
@@ -47,8 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("result").innerHTML = `
                     <p><strong>Network Address:</strong> ${data.network_address}</p>
                     <p><strong>First Usable IP:</strong> ${data.network_address+1}</p>
-                    <p><strong>Last Usable IP:</strong> ${data.broadcast_address-1}</p>
                     <p><strong>Broadcast Address:</strong> ${data.broadcast_address}</p>
+                    
                     <p><strong>Total Hosts:</strong> ${data.total_hosts}</p>
                     <p><strong>Assigned Subnet:</strong> ${data.assigned_subnet}</p>
                 `;

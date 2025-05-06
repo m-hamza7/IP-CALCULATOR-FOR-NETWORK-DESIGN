@@ -30,9 +30,20 @@
             <input type="text" id="ip-address" placeholder="e.g., 192.168.1.10">
         </div>
         
-        <div class="input-group">
-            <label for="subnet-mask">Subnet Mask</label>
-            <input type="text" id="subnet-mask" placeholder="e.g., 255.255.255.0">
+        <!-- Replace the existing subnet mask input with this -->
+        <div class="form-group">
+            <label for="subnet-type">Subnet Format:</label>
+            <select id="subnet-type" class="form-control">
+                <option value="mask">Subnet Mask (e.g., 255.255.255.192)</option>
+                <option value="cidr">CIDR (e.g., 26)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="subnet-input">Subnet:</label>
+            <input type="text" id="subnet-input" class="form-control" required>
+            <small class="form-text text-muted" id="subnet-help">
+                Enter subnet mask (e.g., 255.255.255.192) or CIDR (e.g., 26)
+            </small>
         </div>
         
         <button id="calculate-btn" class="button">Calculate Subnets</button>

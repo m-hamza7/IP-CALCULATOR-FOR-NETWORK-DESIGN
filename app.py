@@ -21,11 +21,12 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # In the init_db() function, update the pcs table creation:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS pcs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 org_id INTEGER,
-                ip_address TEXT NOT NULL,
+                ip_address TEXT NOT NULL UNIQUE,
                 subnet_cidr TEXT NOT NULL,
                 FOREIGN KEY (org_id) REFERENCES organizations(id)
             )
@@ -45,7 +46,7 @@ def subnet_assignment():
 
 
 def get_organizations_data():
-    conn = sqlite3.connect('subnet_manager.db')  # Use your actual DB name
+    conn = sqlite3.connect('subnet_manager.db')  
     cursor = conn.cursor()
 
     # Fetch organizations
@@ -150,24 +151,37 @@ def calculate():
     try:
         data = request.get_json()
         ip_address = data.get("ip_address")
-        subnet_mask = data.get("subnet_mask")
+        subnet_input = data.get("subnet_mask")  # This can be either mask or CIDR
         org_name = data.get("org_name")
 
-        if not ip_address or not subnet_mask or not org_name:
+        if not ip_address or not subnet_input or not org_name:
             return jsonify({"error": "Missing required fields"}), 400
 
-        with sqlite3.connect("subnet_manager.db") as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT id, pc_count FROM organizations WHERE name=?", (org_name,))
-            org = cursor.fetchone()
-            if not org:
-                return jsonify({"error": "Organization not found"}), 404
+        # Handle both CIDR and subnet mask formats
+        try:
+            # Check if input is CIDR (just a number)
+            if subnet_input.isdigit():
+                subnet_bits = int(subnet_input)
+                if subnet_bits < 0 or subnet_bits > 32:
+                    return jsonify({"error": "Invalid CIDR notation. Must be between 0 and 32"}), 400
+            else:
+                # Input is a subnet mask, calculate the CIDR
+                subnet_bits = sum(bin(int(x)).count('1') for x in subnet_input.split('.'))
+
+            # Create network with the calculated CIDR
+            network = ipaddress.IPv4Network(f"{ip_address}/{subnet_bits}", strict=False)
+            
+            with sqlite3.connect("subnet_manager.db") as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT id, pc_count FROM organizations WHERE name=?", (org_name,))
+                org = cursor.fetchone()
+                if not org:
+                    return jsonify({"error": "Organization not found"}), 404
 
             org_id, pc_count = org
-            network = ipaddress.IPv4Network(f"{ip_address}/{subnet_mask}", strict=False)
+            network = ipaddress.IPv4Network(f"{ip_address}/{subnet_bits}", strict=False)
             
-            # Get hosts per subnet based on the subnet mask
-            subnet_bits = sum(bin(int(x)).count('1') for x in subnet_mask.split('.'))
+            # Get hosts per subnet based on the subnet bits
             hosts_per_subnet = 2 ** (32 - subnet_bits) - 2
             
             # Calculate required number of subnets
@@ -199,16 +213,19 @@ def calculate():
                 
                 # Insert PCs for this subnet
                 for i in range(pcs_in_subnet):
-                    cursor.execute(
-                        "INSERT INTO pcs (org_id, ip_address, subnet_cidr) VALUES (?, ?, ?)",
-                        (org_id, str(usable_hosts[i]), subnet_bits)
-                    )
+                    try:
+                        cursor.execute(
+                            "INSERT INTO pcs (org_id, ip_address, subnet_cidr) VALUES (?, ?, ?)",
+                            (org_id, str(usable_hosts[i]), subnet_bits)
+                        )
+                    except sqlite3.IntegrityError:
+                        return jsonify({"error": f"IP address {str(usable_hosts[i])} is already in use"}), 400
                 
                 pcs_remaining -= pcs_in_subnet
                 if pcs_remaining > 0:
                     next_network = int(current_subnet.network_address) + current_subnet.num_addresses
                     current_subnet = ipaddress.IPv4Network(
-                        f"{ipaddress.IPv4Address(next_network)}/{subnet_mask}",
+                        f"{ipaddress.IPv4Address(next_network)}/{subnet_bits}",
                         strict=False
                     )
             
@@ -219,21 +236,24 @@ def calculate():
                 'subnet': str(s['network']),
                 'network_address': str(s['network'].network_address),
                 'broadcast_address': str(s['network'].broadcast_address),
-                'first_usable': str(s['network'].network_address+1),
+                'first_usable':str(s['network'].network_address+1),
                 'last_usable': str(s['network'].broadcast_address-1),
                 'pcs_allocated': s['pcs_count']
             } for s in subnets_used]
 
-        response = {
-            "network_address": str(network.network_address),
-            "broadcast_address": str(network.broadcast_address),
-            "total_hosts": network.num_addresses - 2,
-            "organization": org_name,
-            "assigned_subnet": str(network),
-            "subnets": subnet_info
-        }
+            response = {
+                "network_address": str(network.network_address),
+                "broadcast_address": str(network.broadcast_address),
+                "total_hosts": network.num_addresses - 2,
+                "organization": org_name,
+                "assigned_subnet": str(network),
+                "subnets": subnet_info
+            }
 
-        return jsonify(response)
+            return jsonify(response)
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
